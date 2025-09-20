@@ -8,10 +8,10 @@ public class MainTest {
 
     @BeforeEach
     void setUp() {
-        Main.FuelType.Vehicle.Station.reset();
-        Main.FuelType.Vehicle.Station.setPrice(Main.FuelType.PETROL, 1.0);
-        Main.FuelType.Vehicle.Station.setPrice(Main.FuelType.DIESEL, 1.1);
-        Main.FuelType.Vehicle.Station.setPrice(Main.FuelType.HYBRID, 0.5);
+        Main.FuelType.Vehicle.Station.r();
+        Main.FuelType.Vehicle.Station.setP(Main.FuelType.PETROL, 1.0);
+        Main.FuelType.Vehicle.Station.setP(Main.FuelType.DIESEL, 1.1);
+        Main.FuelType.Vehicle.Station.setP(Main.FuelType.HYBRID, 0.5);
 
         Main.FuelType.Vehicle.Station.FuelTank.add(Main.FuelType.PETROL, 100.0);
         Main.FuelType.Vehicle.Station.FuelTank.add(Main.FuelType.DIESEL, 50.0);
@@ -25,7 +25,7 @@ public class MainTest {
         double cost = Main.FuelType.Vehicle.Station.Manager.Pump.P.fBL(
                 Main.FuelType.Vehicle.CAR1, 20);
         assertEquals(30.0, Main.FuelType.Vehicle.CAR1.getcL(), 1e-9);
-        assertEquals(20.0, Main.FuelType.Vehicle.Station.getSold(Main.FuelType.PETROL), 1e-9);
+        assertEquals(20.0, Main.FuelType.Vehicle.Station.getS(Main.FuelType.PETROL), 1e-9);
         assertEquals(20.0, cost, 1e-9);
     }
 
@@ -34,7 +34,7 @@ public class MainTest {
         double cost = Main.FuelType.Vehicle.Station.Manager.Pump.P.fTF(
                 Main.FuelType.Vehicle.CAR1);
         assertEquals(50.0, Main.FuelType.Vehicle.CAR1.getcL(), 1e-9);
-        assertEquals(40.0, Main.FuelType.Vehicle.Station.getSold(Main.FuelType.PETROL), 1e-9);
+        assertEquals(40.0, Main.FuelType.Vehicle.Station.getS(Main.FuelType.PETROL), 1e-9);
         assertEquals(40.0, cost, 1e-9);
     }
 
@@ -44,7 +44,7 @@ public class MainTest {
                 Main.FuelType.Vehicle.CAR1, 150.0);
         // топлива всего 100 - currentLevel 10, бак 50, max 40 можно заправить
         assertEquals(50.0, Main.FuelType.Vehicle.CAR1.getcL(), 1e-9);
-        assertEquals(40.0, Main.FuelType.Vehicle.Station.getSold(Main.FuelType.PETROL), 1e-9);
+        assertEquals(40.0, Main.FuelType.Vehicle.Station.getS(Main.FuelType.PETROL), 1e-9);
         assertEquals(40.0, paid, 1e-9);
     }
 
