@@ -1,169 +1,173 @@
 package ru.bmstu;
 
+import java.util.Scanner;
+
 public enum Main {
     ;
-
     public enum FuelType {
-        PETROL_80, PETROL_95, PETROL_98, DIESEL, HYBRID, ELECTRIC;
+        PETROL, DIESEL, HYBRID, ELECTRIC;
         public enum Vehicle {
-            CAR1(FuelType.PETROL_95, 50, 10);
+            CAR1(FuelType.PETROL, 50, 10);
 
             public enum Station {
                 ;
                 public enum Manager {
                     ;
                     public enum Pump {
-                        P95(Kind.NORMAL, FuelType.PETROL_95),
+                        P(Kind.NORMAL, FuelType.PETROL),
                         DIESEL(Kind.NORMAL, FuelType.DIESEL),
-                        HYBRID(Kind.HYBRID_ONLY, FuelType.HYBRID),
-                        ELECTRIC(Kind.ELECTRIC_ONLY, FuelType.ELECTRIC);
+                        HYBRID(Kind.HYBRID, FuelType.HYBRID),
+                        ELECTRIC(Kind.ELECTRIC, FuelType.ELECTRIC);
 
-                        public enum Kind { NORMAL, HYBRID_ONLY, ELECTRIC_ONLY }
+                        public enum Kind { NORMAL, HYBRID, ELECTRIC}
 
-                        private final Kind kind;
-                        private final FuelType supported;
+                        private final Kind k;
+                        private final FuelType s;
 
-                        Pump(Kind kind, FuelType supported) {
-                            this.kind = kind;
-                            this.supported = supported;
+                        Pump(Kind k, FuelType s) {
+                            this.k = k;
+                            this.s = s;
                         }
 
-                        private void check(FuelType.Vehicle v) {
-                            if (v.getFuelType() != supported)
+                        private void c(FuelType.Vehicle v) {
+                            if (v.getfT() != s)
                                 throw new IllegalArgumentException("Неподдерживаемый тип топлива");
                         }
 
-                        public double fuelByLiters(FuelType.Vehicle v, double liters) {
-                            check(v);
-                            double canFill = Math.min(liters, v.getNeededToFull());
-                            double taken = FuelTank.remove(v.getFuelType(), canFill);
-                            if (taken <= 0) throw new IllegalStateException("Нет топлива");
-                            v.addFuel(taken);
-                            double cost = taken * FuelType.Vehicle.Station.getPrice(v.getFuelType());
-                            FuelType.Vehicle.Station.recordSale(v.getFuelType(), taken, cost);
-                            return cost;
+                        public double fBL(FuelType.Vehicle v, double l) {
+                            c(v);
+                            double cF = Math.min(l, v.getNTF());
+                            double t = FuelTank.remove(v.getfT(), cF);
+                            if (t <= 0) throw new IllegalStateException("Нет топлива");
+                            v.addF(t);
+                            double c = t * FuelType.Vehicle.Station.getPrice(v.getfT());
+                            FuelType.Vehicle.Station.recordSale(v.getfT(), t, c);
+                            return c;
                         }
 
-                        public double fuelToFull(FuelType.Vehicle v) {
-                            if (kind != Kind.NORMAL) throw new IllegalArgumentException("Нельзя");
-                            return fuelByLiters(v, v.getNeededToFull());
+                        public double fTF(FuelType.Vehicle v) {
+                            if (k != Kind.NORMAL) throw new IllegalArgumentException("Нельзя");
+                            return fBL(v, v.getNTF());
                         }
 
-                        public double fuelByMoney(FuelType.Vehicle v, double money) {
-                            if (kind != Kind.NORMAL) throw new IllegalArgumentException("Нельзя");
-                            double liters = money / FuelType.Vehicle.Station.getPrice(v.getFuelType());
-                            return fuelByLiters(v, liters);
+                        public double fBM(FuelType.Vehicle v, double m) {
+                            if (k != Kind.NORMAL) throw new IllegalArgumentException("Нельзя");
+                            double l = m / FuelType.Vehicle.Station.getPrice(v.getfT());
+                            return fBL(v, l);
                         }
                     }
 
-                    public static double revenue() { return FuelType.Vehicle.Station.getRevenue(); }
-                    public static double sold(FuelType t) { return FuelType.Vehicle.Station.getSold(t); }
-                    public static void order(FuelType t, double amt, double cost) { FuelType.Vehicle.Station.orderTanker(t, amt, cost); }
+                    public static double r() { return FuelType.Vehicle.Station.getR(); }
+                    public static double s(FuelType t) { return FuelType.Vehicle.Station.getSold(t); }
+                    public static void o(FuelType t, double amt, double cost) { FuelType.Vehicle.Station.orderTanker(t, amt, cost); }
                 }
 
-                private static final java.util.EnumMap<FuelType, Double> prices =
+                private static final java.util.EnumMap<FuelType, Double> p =
                         new java.util.EnumMap<>(FuelType.class);
-                private static final java.util.EnumMap<FuelType, Double> sold =
+                private static final java.util.EnumMap<FuelType, Double> s =
                         new java.util.EnumMap<>(FuelType.class);
-                private static double revenue = 0.0;
+                private static double r = 0.0;
 
                 static {
                     for (FuelType t : FuelType.values()) {
-                        prices.put(t, 0.0);
-                        sold.put(t, 0.0);
+                        p.put(t, 0.0);
+                        s.put(t, 0.0);
                     }
                 }
 
-                public static void setPrice(FuelType t, double price) { prices.put(t, price); }
-                public static double getPrice(FuelType t) { return prices.get(t); }
+                public static void setPrice(FuelType t, double price) { p.put(t, price); }
+                public static double getPrice(FuelType t) { return p.get(t); }
 
-                public static void recordSale(FuelType t, double liters, double money) {
-                    sold.put(t, sold.get(t) + liters);
-                    revenue += money;
+                public static void recordSale(FuelType t, double l, double m) {
+                    s.put(t, s.get(t) + l);
+                    r += m;
                 }
 
-                public static double getRevenue() { return revenue; }
-                public static double getSold(FuelType t) { return sold.get(t); }
+                public static double getR() { return r; }
+                public static double getSold(FuelType t) { return s.get(t); }
 
-                public static void orderTanker(FuelType t, double amount, double costPerLiter) {
-                    FuelTank.add(t, amount);
-                    revenue -= amount * costPerLiter;
+                public static void orderTanker(FuelType t, double a, double cPL) {
+                    FuelTank.add(t, a);
+                    r -= a * cPL;
                 }
 
                 public enum FuelTank {
                     ;
-                    private static final java.util.EnumMap<FuelType, Double> volumes =
+                    private static final java.util.EnumMap<FuelType, Double> v =
                             new java.util.EnumMap<>(FuelType.class);
 
                     static {
-                        for (FuelType t : FuelType.values()) volumes.put(t, 0.0);
+                        for (FuelType t : FuelType.values()) v.put(t, 0.0);
                     }
 
-                    public static double getVolume(FuelType type) { return volumes.get(type); }
+                    public static double getV(FuelType t) { return v.get(t); }
 
-                    public static void add(FuelType type, double amount) {
-                        if (amount < 0) throw new IllegalArgumentException();
-                        volumes.put(type, getVolume(type) + amount);
+                    public static void add(FuelType t, double a) {
+                        if (a < 0) throw new IllegalArgumentException();
+                        v.put(t, getV(t) + a);
                     }
 
-                    public static double remove(FuelType type, double amount) {
-                        double avail = getVolume(type);
-                        double taken = Math.min(avail, amount);
-                        volumes.put(type, avail - taken);
-                        return taken;
+                    public static double remove(FuelType t, double a) {
+                        double av = getV(t);
+                        double ta = Math.min(av, a);
+                        v.put(t, av - ta);
+                        return ta;
                     }
 
                     public static void reset() {
-                        for (FuelType t : FuelType.values()) volumes.put(t, 0.0);
+                        for (FuelType t : FuelType.values()) v.put(t, 0.0);
                     }
                 }
 
                 public static void reset() {
                     for (FuelType t : FuelType.values()) {
-                        prices.put(t, 0.0);
-                        sold.put(t, 0.0);
+                        p.put(t, 0.0);
+                        s.put(t, 0.0);
                     }
-                    revenue = 0.0;
+                    r = 0.0;
                     FuelTank.reset();
                 }
             }
 
-            private final FuelType fuelType;
-            private final double tankCapacity;
-            private double currentLevel;
+            private final FuelType fT;
+            private final double tC;
+            private double cL;
 
-            Vehicle(FuelType fuelType, double tankCapacity, double currentLevel) {
-                this.fuelType = fuelType;
-                this.tankCapacity = tankCapacity;
-                this.currentLevel = currentLevel;
+            Vehicle(FuelType fT, double tC, double cL) {
+                this.fT = fT;
+                this.tC = tC;
+                this.cL = cL;
             }
 
-            public FuelType getFuelType() { return fuelType; }
-            public double getTankCapacity() { return tankCapacity; }
-            public double getCurrentLevel() { return currentLevel; }
-            public double getNeededToFull() { return tankCapacity - currentLevel; }
+            public FuelType getfT() { return fT; }
+            public double gettC() { return tC; }
+            public double getcL() { return cL; }
+            public double getNTF() { return tC - cL; }
 
-            public void addFuel(double amount) {
+            public void addF(double amount) {
                 if (amount < 0) throw new IllegalArgumentException("Отрицательное количество");
-                if (currentLevel + amount > tankCapacity + 1e-9)
+                if (cL + amount > tC + 1e-9)
                     throw new IllegalArgumentException("Переполнение бака");
-                currentLevel += amount;
+                cL += amount;
             }
 
-            public void reset(double level) { this.currentLevel = level; }
+            public void r(double l) { this.cL = l; }
         }
     }
 
 
     public static void main(String[] args) {
         FuelType.Vehicle.Station.reset();
-        FuelType.Vehicle.Station.setPrice(FuelType.PETROL_95, 1.2);
-        FuelType.Vehicle.Station.FuelTank.add(FuelType.PETROL_95, 200);
-
-        FuelType.Vehicle.CAR1.reset(10);
-        double cost = FuelType.Vehicle.Station.Manager.Pump.P95.fuelToFull(FuelType.Vehicle.CAR1);
-
-        System.out.println("Заправка: " + cost + ", теперь в баке: " + FuelType.Vehicle.CAR1.getCurrentLevel());
-        System.out.println("Выручка: " + FuelType.Vehicle.Station.Manager.revenue());
+        FuelType.Vehicle.Station.setPrice(FuelType.PETROL, 1.2);
+        FuelType.Vehicle.Station.FuelTank.add(FuelType.PETROL, 200);
+        Scanner scanner = new Scanner(System.in);
+        FuelType.Vehicle.CAR1.r(10);
+        while (FuelType.Vehicle.CAR1.gettC()-FuelType.Vehicle.CAR1.getcL() > 0) {
+            System.out.print("Заправить литров: ");
+            int l = scanner.nextInt();
+            double cost = FuelType.Vehicle.Station.Manager.Pump.P.fBL(FuelType.Vehicle.CAR1, l);
+            System.out.println("Заправка: " + cost + ", теперь в баке: " + FuelType.Vehicle.CAR1.getcL());
+            System.out.println("Выручка: " + FuelType.Vehicle.Station.Manager.r());
+        }
     }
 }
